@@ -32,7 +32,7 @@ static struct Tile tiles[16];   /* 16 = ROW * COLUMN */
 
 // サブプログラム
 int findTileNum(int num){
-    int i, j;
+    int i;
     for (i = 0; i < ROW * COLUMN; i++){
         if (tiles[i].num == num){
             return i;
@@ -60,7 +60,7 @@ void swapTileC(int r, int c1, int c2){
 }
 /* ============================================================ */
 void moveTile(int sel){
-    int i, j;
+    int j;
     int s = findTileNum(sel);
     int sr = tiles[s].row;
     int sc = tiles[s].clm;
@@ -100,20 +100,19 @@ void moveTile(int sel){
 }
 /* ============================================================ */
 void shuffle(int n){
-    int min = 0;
-    int max = ROW*COLUMN;
+    int sel, min = 0, max = ROW*COLUMN;
     do{
-        int sel = (rand() % (max - min + 1)) + min;
+        sel = (rand() % (max - min + 1)) + min;
         moveTile(sel);
         n--;
     } while (0 < n);
 }
 /* ============================================================ */
 enum BOOLEAN check(){
-    int i, j;
-    for (int i = 0; i < ROW; i++){
-        for (int j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+  int i, j, n;
+    for (i = 0; i < ROW; i++){
+        for (j = 0; j < COLUMN; j++){
+            n = i * COLUMN + j;
             if (tiles[n].num != n){
                 return true;
             }
@@ -123,11 +122,11 @@ enum BOOLEAN check(){
 }
 /* ============================================================ */
 void disp(){
-    int i, j;
+  int i, j, n;
     printf("\n");
-    for (int i = 0; i < ROW; i++){
-        for (int j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+    for (i = 0; i < ROW; i++){
+        for (j = 0; j < COLUMN; j++){
+            n = i * COLUMN + j;
             if (tiles[n].num == 0){
                 printf("[  ]");
             } else {
@@ -140,10 +139,10 @@ void disp(){
 /* ============================================================ */
 void init(){
     srand((unsigned)time(NULL));
-    int i, j;
+    int i, j, n;
     for (i = 0; i < ROW; i++){
         for (j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+            n = i * COLUMN + j;
             tiles[n].num = n;
             tiles[n].row = i;
             tiles[n].clm = j;

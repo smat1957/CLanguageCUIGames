@@ -18,7 +18,7 @@ static int board[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 #define NEXT 200
 /* ============================================================ */
 int switchTurn(int turn) {
-    if (turn== BATSU)return MARU;
+    if ( turn == BATSU) return MARU;
     return BATSU;
 }
 /* ============================================================ */
@@ -26,8 +26,8 @@ void printBoard() {
     char bd[9];
     int i;
     for (i = 0; i < 9; i++) {
-        if (board[i] == MARU) bd[i] = 'O';
-        else if (board[i] == BATSU) bd[i] = 'X';
+        if ( board[i] == MARU ) bd[i] = 'O';
+        else if ( board[i] == BATSU ) bd[i] = 'X';
         else bd[i] = '0' + i;
     }
     printf("\n/---|---|---\\\n");
@@ -50,10 +50,10 @@ void result(int winner) {
 }
 /* ============================================================ */
 int slotNum(int turn) {
-    char *fig = "";
-    if (turn==MARU) fig = "'O'";
-    else if (turn==BATSU) fig = "'X'";
     int num;
+    char *fig = "";
+    if ( turn == MARU ) fig = "'O'";
+    else if ( turn == BATSU ) fig = "'X'";
     do {
         printf("\n %s さんのturnです\n石を置く場所 0 〜 8 を指定して下さい：", fig);
         //while (getchar() != '\n');  /* 標準入力バッファのクリア */
@@ -99,16 +99,15 @@ int checkWinner() {
 /* ============================================================ */
 int main(int argc, char *argv[]){
     /* 先手後手を決定 */
-    int turn = BATSU;
+  int turn = BATSU, winner, num;
     if (1 < argc){
         if (!strcmp(argv[1], "-r"))
             turn = MARU;
     }
     printf("スタート！ [Tic Tac Toe]\n");
-    int winner;
     do{
         printBoard();            /* ①盤面の表示 */
-        int num = slotNum(turn); /* ②手を入力 */
+        num = slotNum(turn);     /* ②手を入力 */
         board[num] = turn;       /* ③手を盤面に配置 */
         turn = switchTurn(turn); /* ④手番の交代 */
         winner = checkWinner();  /* ⑤勝敗の判定 */

@@ -161,16 +161,15 @@ captionpos = t
 \begin{lstlisting}[]
 int main(int argc, char *argv[]){
     /* 先手後手を決定 */
-    int turn = BATSU;
+    int turn = BATSU,  winner, num;
     if (1 < argc){
         if (!strcmp(argv[1], "-r"))
             turn = MARU;
     }
     printf("スタート！ [Tic Tac Toe]\n");
-    int winner;
     do{
         printBoard();            /* ①盤面の表示 */
-        int num = slotNum(turn); /* ②手を入力 */
+        num = slotNum(turn); /* ②手を入力 */
         board[num] = turn;       /* ③手を盤面に配置 */
         turn = switchTurn(turn); /* ④手番の交代 */
         winner = checkWinner();  /* ⑤勝敗の判定 */
@@ -216,10 +215,10 @@ int switchTurn(int turn) {
 
 \begin{lstlisting}
 int slotNum(int turn) {
+    int num;
     char *fig = "";
     if (turn==MARU) fig = "'O'";
     else if (turn==BATSU) fig = "'X'";
-    int num;
     do {
         printf("\n %s さんのturnです\n石を置く場所 0 〜 8 を指定して下さい：", fig);
         //while (getchar() != '\n');  /* 標準入力バッファのクリア */
@@ -384,11 +383,11 @@ int main(void) {
 
 \begin{lstlisting}
 void init(){
+    int i, j, n;
     srand((unsigned)time(NULL));
-    int i, j;
     for (i = 0; i < ROW; i++){
         for (j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+            n = i * COLUMN + j;
             tiles[n].num = n;
             tiles[n].row = i;
             tiles[n].clm = j;
@@ -404,10 +403,9 @@ void init(){
 
 \begin{lstlisting}
 void shuffle(int n){
-    int min = 0;
-    int max = ROW*COLUMN;
+    int sel, min = 0, max = ROW*COLUMN;
     do{
-        int sel = (rand() % (max - min + 1)) + min;
+        sel = (rand() % (max - min + 1)) + min;
         moveTile(sel);
         n--;
     } while (0 < n);
@@ -420,11 +418,11 @@ void shuffle(int n){
 
 \begin{lstlisting}
 void disp(){
-    int i, j;
+    int i, j, n;
     printf("\n");
-    for (int i = 0; i < ROW; i++){
-        for (int j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+    for (i = 0; i < ROW; i++){
+        for (j = 0; j < COLUMN; j++){
+            n = i * COLUMN + j;
             if (tiles[n].num == 0){
                 printf("[  ]");
             } else {
@@ -440,7 +438,7 @@ void disp(){
 
 \begin{lstlisting}
 int findTileNum(int num){
-    int i, j;
+    int i;
     for (i = 0; i < ROW * COLUMN; i++){
         if (tiles[i].num == num){
             return i;
@@ -464,7 +462,7 @@ void swapTileC(int r, int c1, int c2){
     swapTile(n1, n2);
 }
 void moveTile(int sel){
-    int i, j;
+    int j;
     int s = findTileNum(sel);
     int sr = tiles[s].row;
     int sc = tiles[s].clm;
@@ -508,10 +506,10 @@ void moveTile(int sel){
 
 \begin{lstlisting}
 enum BOOLEAN check(){
-    int i, j;
-    for (int i = 0; i < ROW; i++){
-        for (int j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+    int i, j, n;
+    for (i = 0; i < ROW; i++){
+        for (j = 0; j < COLUMN; j++){
+            n = i * COLUMN + j;
             if (tiles[n].num != n){
                 return true;
             }
@@ -695,10 +693,10 @@ int main( void ){
 \begin{lstlisting}
 void init(){
     srand((unsigned)time(NULL));
-    int i, j;
+    int i, j, num;
     for (i = 0; i < ROW/2; i++){
         for (j = 0; j < COLUMN; j++){
-            int num = i * COLUMN + j;
+            num = i * COLUMN + j;
             cards[num].num = cards[ROW * COLUMN - num].num = num;
             cards[num].row = cards[ROW * COLUMN - num].row = i;
             cards[num].clm = cards[ROW * COLUMN - num].clm = j;
@@ -721,10 +719,9 @@ void swapCards(int n1, int n2){
     cards[n1] = temp;
 }
 void shuffle(){
-    int min = 0;
-    int max = ROW*COLUMN;
+    int sel, min = 0, max = ROW*COLUMN;
     while (0 < max){
-        int sel = (rand() % (max - min + 1)) + min;
+        sel = (rand() % (max - min + 1)) + min;
         swapCards(sel, max--);
     }
 }
@@ -734,11 +731,11 @@ void shuffle(){
 
 \begin{lstlisting}
 void disp(){
-    int i, j;
+    int i, j, n;
     printf("\n");
     for (i = 0; i < ROW; i++){
         for (j = 0; j < COLUMN; j++){
-            int n = i * COLUMN + j;
+            n = i * COLUMN + j;
             if ( !cards[n].opn )
                 printf("[ %c ]", 'a' + i * COLUMN + j );
             else
@@ -864,19 +861,19 @@ enum BOOLEAN Turn = true;
 
 \section{三目並べ}
 
-\lstinputlisting[caption=Tic Tac Toe(三目並べ),label=tictactoe]{../src/tictactoe.c}
+\lstinputlisting[caption=Tic Tac Toe(三目並べ),label=tictactoe]{tictactoe.c}
 
 \newpage
 
 \section{スライド・パズル}
 
-\lstinputlisting[caption=スライド・パズル,label=slidetile]{../src/slidetile.c}
+\lstinputlisting[caption=スライド・パズル,label=slidetile]{slidetile.c}
 
 \newpage
 
 \section{神経衰弱}
 
-\lstinputlisting[caption=神経衰弱,label=flipcard]{../src/flipcard.c}
+\lstinputlisting[caption=神経衰弱,label=flipcard]{flipcard.c}
 
 %
 \begin{thebibliography}{99}

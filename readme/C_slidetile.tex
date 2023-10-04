@@ -1,0 +1,324 @@
+% latex uft-8
+\documentclass[uplatex,a4paper,11pt,oneside,openany]{jsarticle}
+%
+\usepackage[T1]{fontenc}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage[dvipdfmx]{color}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{ascmac}
+\usepackage{setspace}
+\usepackage{here}
+\usepackage{url}
+\usepackage{ulem}
+\usepackage{colortbl}
+\usepackage{comment}
+\usepackage{setspace}
+\usepackage{multicol}
+\usepackage{multicolpar}
+\usepackage{listings,jlisting} %日本語のコメントアウトをする場合jlistingが必要
+%ここからソースコードの表示に関する設定
+\lstset{
+	%プログラム言語(複数の言語に対応，C,C++も可)
+	language = Python,
+	%背景色と透過度
+	backgroundcolor = {\color[gray]{.95}},
+	%枠外に行った時の自動改行
+	breaklines = true,
+	%自動改行後のインデント量(デフォルトでは20[pt])
+	breakindent = 10pt,
+	%標準の書体
+	%basicstyle = \ttfamily\scriptsize,
+	basicstyle = \fontsize{8}{10}\selectfont\ttfamily,
+	%コメントの書体
+	commentstyle = {\itshape \color[cmyk]{1,0.4,1,0}},
+	%関数名等の色の設定
+	classoffset = 0,
+	%キーワード(int, ifなど)の書体
+	keywordstyle = {\bfseries \color[cmyk]{0,1,0,0}},
+	%表示する文字の書体
+	stringstyle = {\ttfamily \color[rgb]{0,0,1}},
+	%枠 "t"は上に線を記載,"T"は上に二重線を記載
+	%他オプション：leftline，topline，bottomline，lines，single，shadowbox
+	frame = TBrl,
+	%frameまでの間隔(行番号とプログラムの間)
+	framesep = 5pt,
+	%行番号の位置
+	numbers = left,
+	%行番号の間隔
+	stepnumber = 1,
+	%行番号の書体
+	numberstyle = \tiny,
+	%タブの大きさ
+	tabsize = 4,
+	%キャプションの場所("tb"ならば上下両方に記載)
+	captionpos = t
+}
+%ここまでソースコードの表示に関する設定
+
+\begin{document}
+	\title{C言語：スライド・パズル（15Puzzle）}
+	\author{富山工業高校 機械工学科 2年}
+	\date{2023年10月11日}
+	\maketitle
+	\pagestyle{empty}
+
+\newpage
+
+\section{ゲームの概要}
+
+$4 \times 4$に区切った盤面上の各タイルに、$0〜15$の番号が割り振られている。
+0 が割り振られたタイルは空欄になっていて、他のタイルはその空欄にスライドさせて
+移動することができる。
+最初は不規則に並べられている盤面ですが、空欄の上下、あるいは空欄の左右のタイルを
+選んでは、空欄の方向にスライドさせる事によって、最終的に1から15まで規則正しく
+並んだ盤面状態を目指すゲームである。
+
+\begin{spacing}{0.74}
+	\begin{verbatim}
+		% ./slidetile
+		
+		[11][ 3][ 6][10]
+		[ 9][ 1][ 8][14]
+		[ 2][ 4][ 7][12]
+		[13][15][  ][ 5]
+		
+		Select number:6
+		
+		[11][ 3][  ][10]
+		[ 9][ 1][ 6][14]
+		[ 2][ 4][ 8][12]
+		[13][15][ 7][ 5]
+		
+		Select number:11
+		
+		[  ][11][ 3][10]
+		[ 9][ 1][ 6][14]
+		[ 2][ 4][ 8][12]
+		[13][15][ 7][ 5]
+		
+		Select number:11
+		
+		[11][  ][ 3][10]
+		[ 9][ 1][ 6][14]
+		[ 2][ 4][ 8][12]
+		[13][15][ 7][ 5]
+		
+		Select number:
+	\end{verbatim}
+\end{spacing}
+
+\newpage
+
+\section{主処理(main)}
+
+\begin{lstlisting}
+	int main(void) {
+		int sel;
+		init();
+		do {
+			disp();
+			do {
+				printf("\nSelect number:");
+				scanf("%d", &sel);
+			} while( sel>ROW*COLUMN );
+			moveTile(sel);
+		} while( check() );
+		
+		return 0;
+	}
+\end{lstlisting}
+
+\section{盤面の初期化(init)}
+
+乱数を使ってタイルをシャフルするので、
+時刻を乱数の種に指定することによって、
+プログラムを起動する度に、異なるタイル配置になる様にしている
+
+\begin{lstlisting}
+	void init(){
+		int i, j, n;
+		srand((unsigned)time(NULL));
+		for (i = 0; i < ROW; i++){
+			for (j = 0; j < COLUMN; j++){
+				n = i * COLUMN + j;
+				tiles[n].num = n;
+				tiles[n].row = i;
+				tiles[n].clm = j;
+			}
+		}
+		shuffle(1000);
+	}
+\end{lstlisting}
+
+\section{シャッフル(shuffle)}
+
+乱数を使って、タイルを不規則に選択し移動させている
+
+\begin{lstlisting}
+	void shuffle(int n){
+		int sel, min = 0, max = ROW*COLUMN;
+		do{
+			sel = (rand() % (max - min + 1)) + min;
+			moveTile(sel);
+			n--;
+		} while (0 < n);
+	}
+\end{lstlisting}
+
+\newpage
+
+\section{盤面の表示(disp)}
+
+\begin{lstlisting}
+	void disp(){
+		int i, j, n;
+		printf("\n");
+		for (i = 0; i < ROW; i++){
+			for (j = 0; j < COLUMN; j++){
+				n = i * COLUMN + j;
+				if (tiles[n].num == 0){
+					printf("[  ]");
+				} else {
+					printf("[%2d]", tiles[i * COLUMN + j].num);
+				}
+			}
+			printf("\n");
+		}
+	}
+\end{lstlisting}
+
+\section{タイルのスライド(moveTile)}
+
+\begin{lstlisting}
+	int findTileNum(int num){
+		int i, j;
+		for (i = 0; i < ROW * COLUMN; i++){
+			if (tiles[i].num == num){
+				return i;
+			}
+		}
+		return -1;
+	}
+	void swapTile(int n1, int n2){
+		int tmp = tiles[n1].num; 
+		tiles[n1].num = tiles[n2].num;
+		tiles[n2].num = tmp;
+	}
+	void swapTileR(int c, int r1, int r2){
+		int n1 = r1 * COLUMN + c;
+		int n2 = r2 * COLUMN + c;
+		swapTile(n1, n2);
+	}
+	void swapTileC(int r, int c1, int c2){
+		int n1 = r * COLUMN + c1;
+		int n2 = r * COLUMN + c2;
+		swapTile(n1, n2);
+	}
+	void moveTile(int sel){
+		int i, j;
+		int s = findTileNum(sel);
+		int sr = tiles[s].row;
+		int sc = tiles[s].clm;
+		int z = findTileNum(0);
+		int zr = tiles[z].row;
+		int zc = tiles[z].clm;
+		if (sr == zr){
+			if (sc < zc){
+				for (j = zc; j > sc; j--){
+					if (0 <= j - 1){
+						swapTileC(sr, j, j - 1);
+					}
+				}
+			} else if (zc < sc) {
+				for (j = zc; j < sc; j++){
+					if (j + 1 < COLUMN){
+						swapTileC(sr, j, j + 1);
+					}
+				}
+			}
+		}
+		if (sc == zc){
+			if (sr < zr){
+				for (j = zr; j > sr; j--){
+					if (0 <= j - 1){
+						swapTileR(sc, j, j - 1);
+					}
+				}
+			} else if (zr < sr){
+				for (j = zr; j < sr; j++){
+					if (j + 1 < ROW){
+						swapTileR(sc, j, j + 1);
+					}
+				}
+			}
+		}
+	}
+\end{lstlisting}
+
+\section{完成チェック(check)}
+
+\begin{lstlisting}
+	enum BOOLEAN check(){
+		int i, j, n;
+		for (i = 0; i < ROW; i++){
+			for (j = 0; j < COLUMN; j++){
+				n = i * COLUMN + j;
+				if (tiles[n].num != n){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+\end{lstlisting}
+
+\newpage
+
+\section{各種宣言など}
+
+これは冒頭に記述する
+
+\begin{lstlisting}
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <time.h>
+	
+	// 定数
+	#define ROW 4
+	#define COLUMN 4
+	// 構造体
+	struct Tile{
+		int num;
+		int row;
+		int clm;
+	};
+	enum BOOLEAN{
+		false, /* false = 0, true = 1 */
+		true
+	};
+	// function prototypes
+	/*
+	int findTileNum(int);
+	void swapTile(int,int);
+	void swapTileR(int,int,int);
+	void swapTileC(int,int,int);
+	void moveTile(int);
+	void shuffle(int);
+	enum BOOLEAN check();
+	void disp();
+	void init();
+	*/
+	
+	static struct Tile tiles[16];   /* 16 = ROW * COLUMN */
+\end{lstlisting}
+
+\newpage
+
+\section{プログラムの全体}
+
+\lstinputlisting[caption=スライド・パズル,label=slidetile]{slidetile.c}
+
+\end{document}

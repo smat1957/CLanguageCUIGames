@@ -1,0 +1,277 @@
+% latex uft-8
+\documentclass[uplatex,a4paper,11pt,oneside,openany]{jsarticle}
+%
+\usepackage[T1]{fontenc}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage[dvipdfmx]{color}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{ascmac}
+\usepackage{setspace}
+\usepackage{here}
+\usepackage{url}
+\usepackage{ulem}
+\usepackage{colortbl}
+\usepackage{comment}
+\usepackage{setspace}
+\usepackage{multicol}
+\usepackage{multicolpar}
+\usepackage{listings,jlisting} %日本語のコメントアウトをする場合jlistingが必要
+%ここからソースコードの表示に関する設定
+\lstset{
+	%プログラム言語(複数の言語に対応，C,C++も可)
+	language = Python,
+	%背景色と透過度
+	backgroundcolor = {\color[gray]{.95}},
+	%枠外に行った時の自動改行
+	breaklines = true,
+	%自動改行後のインデント量(デフォルトでは20[pt])
+	breakindent = 10pt,
+	%標準の書体
+	%basicstyle = \ttfamily\scriptsize,
+	basicstyle = \fontsize{8}{10}\selectfont\ttfamily,
+	%コメントの書体
+	commentstyle = {\itshape \color[cmyk]{1,0.4,1,0}},
+	%関数名等の色の設定
+	classoffset = 0,
+	%キーワード(int, ifなど)の書体
+	keywordstyle = {\bfseries \color[cmyk]{0,1,0,0}},
+	%表示する文字の書体
+	stringstyle = {\ttfamily \color[rgb]{0,0,1}},
+	%枠 "t"は上に線を記載,"T"は上に二重線を記載
+	%他オプション：leftline，topline，bottomline，lines，single，shadowbox
+	frame = TBrl,
+	%frameまでの間隔(行番号とプログラムの間)
+	framesep = 5pt,
+	%行番号の位置
+	numbers = left,
+	%行番号の間隔
+	stepnumber = 1,
+	%行番号の書体
+	numberstyle = \tiny,
+	%タブの大きさ
+	tabsize = 4,
+	%キャプションの場所("tb"ならば上下両方に記載)
+	captionpos = t
+}
+%ここまでソースコードの表示に関する設定
+
+\begin{document}
+	\title{C言語：三目並べ（TicTacToe）}
+	\author{富山工業高校 機械工学科 2年}
+	\date{2023年10月11日}
+	\maketitle
+	\pagestyle{empty}
+
+\newpage
+	
+\section{ゲームの概要}
+
+プログラムを実行すると、盤面が表示され、
+×の石を置く場所を指定するよう促されます。
+
+画面上に示された番号を入力すると、
+その番号のスロットに×の石が置かれた盤面が表示され、
+次の手番の○に、石を置く場所を指定するように促されます。
+
+手番を交互に変えながらゲームは進み、縦、横、斜めの何れかに、
+先に一列に自分の石を並べた方が勝ちとなります。
+
+既に石の置かれているスロット番号を指定することはできません。
+また、スロット番号として 0 〜 8 以外の数値を指定することもできません。
+
+\begin{spacing}{0.74}
+	\begin{verbatim}
+		スタート！ [Tic Tac Toe]
+		/---|---|---\
+		| 0 | 1 | 2 |
+		|---|---|---|
+		| 3 | 4 | 5 |
+		|---|---|---|
+		| 6 | 7 | 8 |
+		\---|---|---/
+		'X' さんのturnです
+		石を置く場所 0 〜 8 を指定して下さい : 4
+		/---|---|---\
+		| 0 | 1 | 2 |
+		|---|---|---|
+		| 3 | X | 5 |
+		|---|---|---|
+		| 6 | 7 | 8 |
+		\---|---|---/
+		'O' さんのturnです
+		石を置く場所 0 〜 8 を指定して下さい : 2
+		/---|---|---\
+		| 0 | 1 | O |
+		|---|---|---|
+		| 3 | X | 5 |
+		|---|---|---|
+		| 6 | 7 | 8 |
+		\---|---|---/
+		'X' さんのturnです
+		石を置く場所 0 〜 8 を指定して下さい :
+	\end{verbatim}
+\end{spacing}
+
+\newpage
+
+\section{主処理(main)}
+
+\begin{lstlisting}[]
+	int main(int argc, char *argv[]){
+		/* 先手後手を決定 */
+		int turn = BATSU,  winner, num;
+		if (1 < argc){
+			if (!strcmp(argv[1], "-r"))
+			turn = MARU;
+		}
+		printf("スタート！ [Tic Tac Toe]\n");
+		do{
+			printBoard();            /* ①盤面の表示 */
+			num = slotNum(turn); /* ②手を入力 */
+			board[num] = turn;       /* ③手を盤面に配置 */
+			turn = switchTurn(turn); /* ④手番の交代 */
+			winner = checkWinner();  /* ⑤勝敗の判定 */
+		} while (winner == NEXT);
+		/* 対戦結果の表示 */
+		printBoard();
+		result(winner);
+		return 0;
+	}
+\end{lstlisting}
+
+\section{盤面の表示(printBoard)}
+
+\begin{lstlisting}
+	void printBoard() {
+		char bd[9];
+		int i;
+		for (i = 0; i < 9; i++) {
+			if (board[i] == MARU) bd[i] = 'O';
+			else if (board[i] == BATSU) bd[i] = 'X';
+			else bd[i] = '0' + i;
+		}
+		printf("\n/---|---|---\\\n");
+		printf("| %c | %c | %c |\n", bd[0], bd[1], bd[2]);
+		printf("|---|---|---|\n");
+		printf("| %c | %c | %c |\n", bd[3], bd[4], bd[5]);
+		printf("|---|---|---|\n");
+		printf("| %c | %c | %c |\n", bd[6], bd[7], bd[8]);
+		printf("\\---|---|---/\n");
+	}
+\end{lstlisting}
+
+\section{手番の交代(switchTurn)}
+
+\begin{lstlisting}
+	int switchTurn(int turn) {
+		if (turn== BATSU)return MARU;
+		return BATSU;
+	}
+\end{lstlisting}
+
+\section{入力(slotNum)}
+
+\begin{lstlisting}
+	int slotNum(int turn) {
+		int num;
+		char *fig = "";
+		if (turn==MARU) fig = "'O'";
+		else if (turn==BATSU) fig = "'X'";
+		do {
+			printf("\n %s さんのturnです\n石を置く場所 0 〜 8 を指定して下さい：", fig);
+			//while (getchar() != '\n');  /* 標準入力バッファのクリア */
+			scanf("%d", &num);
+			if (!(0 <= num && num < 9)) {
+				printf("再指定：0 〜 8 を指定して下さい");
+				continue;
+			}
+			if (board[num] != num) {
+				printf("再指定：そこには既に石が置かれています\n");
+				continue;
+			}
+			break;
+		} while (1);
+		return num;
+	}
+\end{lstlisting}
+
+\section{判定(checkWinner)}
+
+\begin{lstlisting}
+	int lineSum(int n1, int n2, int n3) {
+		return board[n1] + board[n2] + board[n3];
+	}
+	int checkWinner() {
+		int i, line = 0;
+		for (i = 0; i < 8; i++) {
+			switch (i) {
+				case 0: line = lineSum(0, 1, 2); break;
+				case 1: line = lineSum(3, 4, 5); break;
+				case 2: line = lineSum(6, 7, 8); break;
+				case 3: line = lineSum(0, 3, 6); break;
+				case 4: line = lineSum(1, 4, 7); break;
+				case 5: line = lineSum(2, 5, 8); break;
+				case 6: line = lineSum(0, 4, 8); break;
+				case 7: line = lineSum(2, 4, 6); break;
+			}
+			if (line == 3 * MARU) return MARU;
+			else if (line == 3 * BATSU) return BATSU;
+		}
+		for (i = 0; i < 9; i++){
+			if (0 <= board[i] && board[i] < 9) return NEXT;
+		}
+		return DRAW;
+	}
+\end{lstlisting}
+
+\newpage
+
+\section{結果表示(result)}
+
+\begin{lstlisting}
+	void result(int winner) {
+		printf("\n");
+		switch (winner) {
+			case DRAW: printf("引き分け\t"); break;
+			case MARU: printf("'O' の勝ち\t"); break;
+			case BATSU: printf("'X' の勝ち\t"); break;
+		}
+		printf("またね！\n");
+	}
+\end{lstlisting}
+
+\section{各種宣言など}
+
+これは冒頭に記述する
+
+\begin{lstlisting}
+	#include <stdio.h>
+	#include <string.h>
+	
+	// function prototypes
+	/*
+	int lineSum(int, int, int);
+	int switchTurn(int);
+	void printBoard();
+	int slotNum(int);
+	int checkWinner();
+	void result(int);
+	*/
+	
+	static int board[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+	#define MARU 10
+	#define BATSU -10
+	#define DRAW 100
+	#define NEXT 200
+\end{lstlisting}
+
+\newpage
+
+\section{プログラムの全体}
+
+\lstinputlisting[caption=Tic Tac Toe(三目並べ),label=tictactoe]{tictactoe.c}
+
+\end{document}
