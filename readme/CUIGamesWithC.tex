@@ -854,6 +854,10 @@ enum BOOLEAN Turn = true;
 
 \section{主処理}
 
+ゲーム盤のサイズは、$4 \times 4, 6 \times 6, 8 \times 8$など偶数の幅を $\#define$ 文で設定する。
+行番号（1,2,3,...）と列記号文字（a,b,c,...）の連続する半角2文字で石の位置を指定する。
+手番の石を置けないところを指定しても無視される。
+
 \begin{lstlisting}
 	POS decode(char* str){
 		POS pos;
@@ -912,6 +916,8 @@ enum BOOLEAN Turn = true;
 
 \section{盤面の表示}
 
+盤面を表示するたびに、石の数を数えて表示している。
+
 \begin{lstlisting}
 	int count(int color){
 		int num=0;
@@ -951,6 +957,8 @@ enum BOOLEAN Turn = true;
 
 \section{初期化}
 
+ボードの幅が偶数でないとゲームを始められない。
+
 \begin{lstlisting}
 	enum BOOLEAN initboard(){
 		if(BOARDW%2)
@@ -979,6 +987,9 @@ enum BOOLEAN Turn = true;
 \end{lstlisting}
 
 \section{手番の交代}
+
+指定された場所が、盤の内部の位置かどうか、
+相手の石を反転させられるかどうかをチェックしている。
 
 \begin{lstlisting}
 	POS movepos(POS pos, int v){
@@ -1045,6 +1056,10 @@ enum BOOLEAN Turn = true;
 \end{lstlisting}
 
 \section{各種宣言など}
+
+これは冒頭に記述する。
+
+$BOOLEAN$形を定義している。ボードの幅は $\#define$ 文で指定する。
 
 \begin{lstlisting}
 	#include <stdio.h>
