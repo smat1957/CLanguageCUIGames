@@ -852,214 +852,25 @@ enum BOOLEAN Turn = true;
 
 \includegraphics[keepaspectratio,scale=0.5]{othelloview.png}
 
-\section{主処理}
-
-ゲーム盤のサイズは、$4 \times 4, 6 \times 6, 8 \times 8$など偶数の幅を $\#define$ 文で設定する。
-行番号（1,2,3,...）と列記号文字（a,b,c,...）の連続する半角2文字で石の位置を指定する。
-手番の石を置けないところを指定しても無視される。
-
-\begin{lstlisting}
-	POS decode(char* str){
-		POS pos;
-		pos.x = atoi(str)-1;
-		char* alpha="abcdefghijklmnopqrstuvwxyz";
-		int i;
-		for(i=0; i<BOARDW; i++){
-			if(*(str+1)==alpha[i])
-				break;
-		}
-		pos.y = i;
-		return pos;
-	}
-	
-	void event(POS pos){
-		if(endflag){
-			initboard();
-			return;
-		}
-		if(0<passcount){
-			nextturn();
-			drawboard();
-			return;
-		}
-		if(!isinside(pos))
-			return;
-		if(0==flippable(pos, turn))
-			return;
-		for(int i=0; i<8; i++){
-			int loop = search(pos, i, turn);
-			POS temp = pos;
-			for(int j=0; j<loop; j++){
-				temp = movepos(temp, i);
-				setstone(temp, turn);
-			}
-		}
-		setstone(pos, turn);
-		nextturn();
-		drawboard();
-	}
-	
-	int main(void){
-		if(!initboard())
-			return 8;
-		char inpt[]="   ";
-		while(!endflag){
-			printf("=>");
-			scanf("%s", inpt);
-			POS pos = decode(inpt);
-			printf("\n");
-			event(pos);
-		}
-		return 0;
-	}
-\end{lstlisting}
-
-\section{盤面の表示}
-
-盤面を表示するたびに、石の数を数えて表示している。
-
-\begin{lstlisting}
-	int count(int color){
-		int num=0;
-		for(int i=0; i<(BOARDW * BOARDW); i++)
-			if(board[i]==color)
-				num++;
-		return num;
-	}
-	
-	void drawboard(){
-		for(int x=0; x<BOARDW; x++){
-			if(x==0){
-				printf("    ");
-				char a='a';
-				for(int i=0; i<BOARDW; i++)
-				printf("%c ", a+i);
-				printf("\n");
-			}
-			printf("%2d  ", x+1);
-			for(int y=0; y<BOARDW; y++){
-				int index = y * BOARDW + x;
-				switch(board[index]){
-					case BLACK:printf("%s ", TILE[BLACK]);break;
-					case WHITE:printf("%s ", TILE[WHITE]);break;
-					case NONE: printf("%s ", TILE[NONE]); break;
-				}
-			}
-			printf("\n");
-		}
-		printf("\n%s(%2d), %s(%2d)",TILE[BLACK],count(BLACK),TILE[WHITE],count(WHITE));
-		if(!endflag)
-			printf(" : turn(%s)\n", TILE[turn]);
-		else
-			printf("\n");
-	}
-\end{lstlisting}
-
-\section{初期化}
-
-ボードの幅が偶数でないとゲームを始められない。
-
-\begin{lstlisting}
-	enum BOOLEAN initboard(){
-		if(BOARDW%2)
-			return false;
-		int x, y;
-		POS pos;
-		for(y=0; y<BOARDW; y++)
-			for(x=0; x<BOARDW; x++){
-				pos.x = x; pos.y = y;
-				setstone(pos, NONE);
-			}
-		pos.x = pos.y = BOARDW/2-1;
-		setstone(pos, BLACK);
-		pos.x = BOARDW/2; pos.y = pos.x-1;
-		setstone(pos, WHITE);
-		pos.y = BOARDW/2; pos.x = pos.y-1;
-		setstone(pos, WHITE);
-		pos.x = pos.y = BOARDW/2;
-		setstone(pos, BLACK);
-		turn = BLACK;
-		passcount = 0;
-		endflag = false;
-		drawboard();
-		return true;
-	}
-\end{lstlisting}
-
-\section{手番の交代}
-
-指定された場所が、盤の内部の位置かどうか、
-相手の石を反転させられるかどうかをチェックしている。
-
-\begin{lstlisting}
-	POS movepos(POS pos, int v){
-		POS p;
-		p.x = pos.x + UNITV[v][0];
-		p.y = pos.y + UNITV[v][1];
-		return p;
-	}
-	
-	enum BOOLEAN isinside(POS pos){
-		if( (pos.x<0) || (BOARDW<=pos.x) )
-			return false;
-		if( (pos.y<0) || (BOARDW<=pos.y) )
-			return false;
-		return true;
-	}
-	
-	int search(POS pos, int v, int num){
-		int piece = 0;
-		while(true){
-			pos = movepos(pos, v);
-			if(!isinside(pos))
-				return 0;
-			if(getstone(pos)==NONE)
-				return 0;
-			if(getstone(pos)==num)
-				break;
-			piece ++;
-		}
-		return piece;
-	}
-	
-	int flippable(POS pos, int num){
-		if(getstone(pos)!=NONE)
-			return 0;
-		int total = 0;
-		int vec[]={0,0};
-		for(int i=0; i<8; i++)
-			total += search(pos, i, num);
-		return total;
-	}
-	
-	void nextturn(){
-		turn ^= 1;
-		int empty = 0;
-		for(int y=0; y<BOARDW; y++)
-			for(int x=0; x<BOARDW; x++){
-				POS pos; pos.x=x; pos.y=y;
-				if(getstone(pos)==NONE)
-					empty++;
-				if(0<flippable(pos,turn)){
-					passcount = 0;
-					return;
-				}
-			}
-		if(empty==0){
-			endflag = true;
-			return;
-		}
-		passcount++;
-		if(2<=passcount)
-			endflag = true;
-	}
-\end{lstlisting}
+\newpage
 
 \section{各種宣言など}
 
-これは冒頭に記述する。
-
-$BOOLEAN$形を定義している。ボードの幅は $\#define$ 文で指定する。
+\begin{enumerate}
+	\item これは冒頭に記述する
+	\item BOOLEAN形を enum で定義する
+	\item 盤面の幅BOARDWは \#define 文で指定する
+	%それは$4 \times 4, 6 \times 6, 8 \times 8$など、4以上8以下の偶数でなければならない
+	\item 盤面に黒の石が置かれている場所にはBLACK 、白の石が置かれている場所はWHITE、何も置かれていない場所はNONEで区別する
+	\item 現在注目している石の位置(x,y)から見て、下の方向には(0,-1)、右下には(1,-1)、右には(0,1)、右上には(1,1)、上には(1,0)、左上には(-1,1)、左には(-1,0)、左下には(-1,-1)を加えることで、上下、左右、斜め右上下、斜め左上下の、全部で8つの方向の場所を確認していくことができる
+	\item 盤面上の場所(x,y)を指定するための構造体POSを定義する
+	\item 盤面状態を保持している1次元配列board上の位置は、POS型変数(x,y)から\\$y \times BOARDW +x$によって求める
+	\item 手番は変数turnに保持している
+	\item パスの回数passcountが2回になるとゲームは終了する
+	\item 終了フラグendglagが偽である間ゲームは続く
+	\item setstone()関数は盤面の指定位置に石を置く操作
+	\item getstone()関数は盤面の指定位置の状態を知る操作
+\end{enumerate}
 
 \begin{lstlisting}
 	#include <stdio.h>
@@ -1102,15 +913,217 @@ $BOOLEAN$形を定義している。ボードの幅は $\#define$ 文で指定�
 	}
 \end{lstlisting}
 
-%\section{プログラムの全体}
 
-%\lstinputlisting[caption=神経衰弱,label=flipcard]{flipcard.c}
+\section{主処理}
 
-%%%%\chapter{おわりに}
-%
-%%%%\section*{謝辞}
-%%%%\addcontentsline{toc}{chapter}{謝辞}
-%
+\begin{enumerate}
+	\item 行番号（1,2,3,...）と列記号文字（a,b,c,...）の連続する半角2文字で石の位置を指定する
+	\item decode()関数を使って、入力された位置の文字列をPOS型変数に変換する（ここに2桁の行番号は想定していない）
+	\item 手番の石を置けない場所（盤面の外：!isinside()、又は反転できる石がない：flippable()がゼロ）を指定しても無視する
+	\item 現在位置posの周辺8方向に、それぞれsearch()で反転できる石の数を数えて反転していく
+\end{enumerate}
+
+\begin{lstlisting}
+	POS decode(char* str){
+		POS pos;
+		pos.x = atoi(str) - 1;
+		pos.y = *(str+1) - 'a';
+		return pos;
+	}
+	
+	void event(POS pos){
+		if(endflag){
+			initboard();
+			return;
+		}
+		if(0<passcount){
+			nextturn();
+			drawboard();
+			return;
+		}
+		if(!isinside(pos))
+		return;
+		if(0==flippable(pos, turn))
+		return;
+		for(int i=0; i<8; i++){
+			int loop = search(pos, i, turn);
+			POS temp = pos;
+			for(int j=0; j<loop; j++){
+				temp = movepos(temp, i);
+				setstone(temp, turn);
+			}
+		}
+		setstone(pos, turn);
+		nextturn();
+		drawboard();
+	}
+	
+	int main(void){
+		if(!initboard())
+		return 8;
+		char inpt[]="   ";
+		while(!endflag){
+			printf("=>");
+			scanf("%s", inpt);
+			POS pos = decode(inpt);
+			printf("\n");
+			event(pos);
+		}
+		return 0;
+	}
+\end{lstlisting}
+
+\section{初期化}
+
+\begin{enumerate}
+	\item ゲームの盤面の幅は、4以上8以下の偶数である
+\end{enumerate}
+
+\begin{lstlisting}
+	enum BOOLEAN initboard(){
+		if(()BOARDW%2)||(BOARDW<4)||(8<BOARDW))
+		return false;
+		int x, y;
+		POS pos;
+		for(y=0; y<BOARDW; y++)
+		for(x=0; x<BOARDW; x++){
+			pos.x = x; pos.y = y;
+			setstone(pos, NONE);
+		}
+		pos.x = pos.y = BOARDW/2-1;
+		setstone(pos, BLACK);
+		pos.x = BOARDW/2; pos.y = pos.x-1;
+		setstone(pos, WHITE);
+		pos.y = BOARDW/2; pos.x = pos.y-1;
+		setstone(pos, WHITE);
+		pos.x = pos.y = BOARDW/2;
+		setstone(pos, BLACK);
+		turn = BLACK;
+		passcount = 0;
+		endflag = false;
+		drawboard();
+		return true;
+	}
+\end{lstlisting}
+
+\section{盤面の表示}
+
+\begin{enumerate}
+	\item 盤面を表示するたびに、count()関数で石の数を数えて表示している。
+\end{enumerate}
+
+\begin{lstlisting}
+	int count(int color){
+		int num=0;
+		for(int i=0; i<(BOARDW * BOARDW); i++)
+		if(board[i]==color)
+		num++;
+		return num;
+	}
+	
+	void drawboard(){
+		for(int x=0; x<BOARDW; x++){
+			if(x==0){
+				printf("    ");
+				char a='a';
+				for(int i=0; i<BOARDW; i++)
+				printf("%c ", a+i);
+				printf("\n");
+			}
+			printf("%2d  ", x+1);
+			for(int y=0; y<BOARDW; y++){
+				int index = y * BOARDW + x;
+				switch(board[index]){
+					case BLACK:printf("%s ", TILE[BLACK]);break;
+					case WHITE:printf("%s ", TILE[WHITE]);break;
+					case NONE: printf("%s ", TILE[NONE]); break;
+				}
+			}
+			printf("\n");
+		}
+		printf("\n%s(%2d), %s(%2d)",TILE[BLACK],count(BLACK),TILE[WHITE],count(WHITE));
+		if(!endflag)
+		printf(" : turn(%s)\n", TILE[turn]);
+		else
+		printf("\n");
+	}
+\end{lstlisting}
+
+\section{手番の交代}
+
+\begin{enumerate}
+	\item isinside()関数は、指定された場所が盤の内部の位置かどうかを調べる
+	\item flippable()関数は、相手の石を何枚反転させられるかを調べる
+	\item movepos()関数は、着目点を現在位置posから上下左右斜めの8方向に移動させる
+	\item search()関数は、vで指示された方向に何個の石を反転させられるかを数えている
+	\item nextturn()関数では、\\石を置ける空いてる場所があるかどうかを調べて無かったら終了フラグを立てる\\
+	指定位置posが相手の石を反転できる場所ならパスの回数をリセットする\\
+	パスの回数が2回続いたら終了フラグを立てる
+\end{enumerate}
+
+\begin{lstlisting}
+	POS movepos(POS pos, int v){
+		POS p;
+		p.x = pos.x + UNITV[v][0];
+		p.y = pos.y + UNITV[v][1];
+		return p;
+	}
+	
+	enum BOOLEAN isinside(POS pos){
+		if( (pos.x<0) || (BOARDW<=pos.x) )
+		return false;
+		if( (pos.y<0) || (BOARDW<=pos.y) )
+		return false;
+		return true;
+	}
+	
+	int search(POS pos, int v, int num){
+		int piece = 0;
+		while(true){
+			pos = movepos(pos, v);
+			if(!isinside(pos))
+			return 0;
+			if(getstone(pos)==NONE)
+			return 0;
+			if(getstone(pos)==num)
+			break;
+			piece ++;
+		}
+		return piece;
+	}
+	
+	int flippable(POS pos, int num){
+		if(getstone(pos)!=NONE)
+		return 0;
+		int total = 0;
+		int vec[]={0,0};
+		for(int i=0; i<8; i++)
+		total += search(pos, i, num);
+		return total;
+	}
+	
+	void nextturn(){
+		turn ^= 1;
+		int empty = 0;
+		for(int y=0; y<BOARDW; y++)
+		for(int x=0; x<BOARDW; x++){
+			POS pos; pos.x=x; pos.y=y;
+			if(getstone(pos)==NONE)
+			empty++;
+			if(0<flippable(pos,turn)){
+				passcount = 0;
+				return;
+			}
+		}
+		if(empty==0){
+			endflag = true;
+			return;
+		}
+		passcount++;
+		if(2<=passcount)
+		endflag = true;
+	}
+\end{lstlisting}
 
 \appendix
 
@@ -1138,9 +1151,16 @@ $BOOLEAN$形を定義している。ボードの幅は $\#define$ 文で指定�
 
 \lstinputlisting[caption=オセロ,label=othello]{../src/othello.c}
 
+%%%%\chapter{おわりに}
+%
+%%%%\section*{謝辞}
+%%%%\addcontentsline{toc}{chapter}{謝辞}
+%
+
 %
 \begin{thebibliography}{99}
-\bibitem{1} 田中賢一郎、「ゲームで学ぶ Java Script 入門」、インプレス
+	\bibitem{1} 田中賢一郎、「ゲームで学ぶ Java Script 入門」、インプレス
+	\bibitem{2} 松原拓也（有限会社ニコ）、「Pythonでリバーシを作ろう」、日経ソフトウェア2023年5月号
 \end{thebibliography}
 %
 % END DOCUMENT

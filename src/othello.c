@@ -73,7 +73,7 @@ void drawboard(){
 }
 
 enum BOOLEAN initboard(){
-  if(BOARDW%2)
+  if((BOARDW%2)||(BOARDW<4)||(8<BOARDW))
     return false;
   int x, y;
   POS pos;
@@ -162,13 +162,7 @@ void nextturn(){
 POS decode(char* str){
   POS pos;
   pos.x = atoi(str)-1;
-  char* alpha="abcdefghijklmnopqrstuvwxyz";
-  int i;
-  for(i=0; i<BOARDW; i++){
-    if(*(str+1)==alpha[i])
-      break;
-  }
-  pos.y = i;
+  pos.y = *(str+1) - 'a';
   return pos;
 }
 
