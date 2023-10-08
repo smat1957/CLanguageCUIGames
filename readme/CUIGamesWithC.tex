@@ -982,14 +982,14 @@ enum BOOLEAN Turn = true;
 \begin{lstlisting}
 	enum BOOLEAN initboard(){
 		if((BOARDW%2)||(BOARDW<4)||(8<BOARDW))
-		return false;
+			return false;
 		int x, y;
 		POS pos;
 		for(y=0; y<BOARDW; y++)
-		for(x=0; x<BOARDW; x++){
-			pos.x = x; pos.y = y;
-			setstone(pos, NONE);
-		}
+			for(x=0; x<BOARDW; x++){
+				pos.x = x; pos.y = y;
+				setstone(pos, NONE);
+			}
 		pos.x = pos.y = BOARDW/2-1;
 		setstone(pos, BLACK);
 		pos.x = BOARDW/2; pos.y = pos.x-1;
