@@ -942,9 +942,9 @@ enum BOOLEAN Turn = true;
 			return;
 		}
 		if(!isinside(pos))
-		return;
+			return;
 		if(0==flippable(pos, turn))
-		return;
+			return;
 		for(int i=0; i<8; i++){
 			int loop = search(pos, i, turn);
 			POS temp = pos;
@@ -960,7 +960,7 @@ enum BOOLEAN Turn = true;
 	
 	int main(void){
 		if(!initboard())
-		return 8;
+			return 8;
 		char inpt[]="   ";
 		while(!endflag){
 			printf("=>");
@@ -1016,7 +1016,7 @@ enum BOOLEAN Turn = true;
 	int count(int color){
 		int num=0;
 		for(int i=0; i<(BOARDW * BOARDW); i++)
-		if(board[i]==color)
+			if(board[i]==color)
 		num++;
 		return num;
 	}
@@ -1027,7 +1027,7 @@ enum BOOLEAN Turn = true;
 				printf("    ");
 				char a='a';
 				for(int i=0; i<BOARDW; i++)
-				printf("%c ", a+i);
+					printf("%c ", a+i);
 				printf("\n");
 			}
 			printf("%2d  ", x+1);
@@ -1043,9 +1043,9 @@ enum BOOLEAN Turn = true;
 		}
 		printf("\n%s(%2d), %s(%2d)",TILE[BLACK],count(BLACK),TILE[WHITE],count(WHITE));
 		if(!endflag)
-		printf(" : turn(%s)\n", TILE[turn]);
+			printf(" : turn(%s)\n", TILE[turn]);
 		else
-		printf("\n");
+			printf("\n");
 	}
 \end{lstlisting}
 
@@ -1071,9 +1071,9 @@ enum BOOLEAN Turn = true;
 	
 	enum BOOLEAN isinside(POS pos){
 		if( (pos.x<0) || (BOARDW<=pos.x) )
-		return false;
+			return false;
 		if( (pos.y<0) || (BOARDW<=pos.y) )
-		return false;
+			return false;
 		return true;
 	}
 	
@@ -1082,11 +1082,11 @@ enum BOOLEAN Turn = true;
 		while(true){
 			pos = movepos(pos, v);
 			if(!isinside(pos))
-			return 0;
+				return 0;
 			if(getstone(pos)==NONE)
-			return 0;
+				return 0;
 			if(getstone(pos)==num)
-			break;
+				break;
 			piece ++;
 		}
 		return piece;
@@ -1094,11 +1094,11 @@ enum BOOLEAN Turn = true;
 	
 	int flippable(POS pos, int num){
 		if(getstone(pos)!=NONE)
-		return 0;
+			return 0;
 		int total = 0;
 		int vec[]={0,0};
 		for(int i=0; i<8; i++)
-		total += search(pos, i, num);
+			total += search(pos, i, num);
 		return total;
 	}
 	
@@ -1106,22 +1106,22 @@ enum BOOLEAN Turn = true;
 		turn ^= 1;
 		int empty = 0;
 		for(int y=0; y<BOARDW; y++)
-		for(int x=0; x<BOARDW; x++){
-			POS pos; pos.x=x; pos.y=y;
-			if(getstone(pos)==NONE)
-			empty++;
-			if(0<flippable(pos,turn)){
-				passcount = 0;
-				return;
+			for(int x=0; x<BOARDW; x++){
+				POS pos; pos.x=x; pos.y=y;
+				if(getstone(pos)==NONE)
+					empty++;
+				if(0<flippable(pos,turn)){
+					passcount = 0;
+					return;
+				}
 			}
-		}
 		if(empty==0){
 			endflag = true;
 			return;
 		}
 		passcount++;
 		if(2<=passcount)
-		endflag = true;
+			endflag = true;
 	}
 \end{lstlisting}
 
