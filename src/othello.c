@@ -27,15 +27,21 @@ typedef struct {
   int x, y;
 }POS;
 
+/* ======================================================================= */
+
 void setstone(POS pos, int num){
   int index = (pos.y * BOARDW) + pos.x;
   board[index] = num;
 }
 
+/* ======================================================================= */
+
 int getstone(POS pos){
   int index = (pos.y * BOARDW) + pos.x;
   return board[index];
 }
+
+/* ======================================================================= */
 
 int count(int color){
   int num=0;
@@ -44,6 +50,8 @@ int count(int color){
       num++;
   return num;
 }
+
+/* ======================================================================= */
 
 void drawboard(){
   for(int x=0; x<BOARDW; x++){
@@ -72,6 +80,8 @@ void drawboard(){
     printf("\n");
 }
 
+/* ======================================================================= */
+
 enum BOOLEAN initboard(){
   if((BOARDW%2)||(BOARDW<4)||(8<BOARDW))
     return false;
@@ -97,12 +107,16 @@ enum BOOLEAN initboard(){
   return true;
 }
 
+/* ======================================================================= */
+
 POS movepos(POS pos, int v){
   POS p;
   p.x = pos.x + UNITV[v][0];
   p.y = pos.y + UNITV[v][1];
   return p;
 }
+
+/* ======================================================================= */
 
 enum BOOLEAN isinside(POS pos){
   if( (pos.x<0) || (BOARDW<=pos.x) )
@@ -111,6 +125,8 @@ enum BOOLEAN isinside(POS pos){
     return false;
   return true;
 }
+
+/* ======================================================================= */
 
 int search(POS pos, int v, int num){
   int piece = 0;
@@ -127,6 +143,8 @@ int search(POS pos, int v, int num){
   return piece;
 }
 
+/* ======================================================================= */
+
 int flippable(POS pos, int num){
   if(getstone(pos)!=NONE)
     return 0;
@@ -136,6 +154,8 @@ int flippable(POS pos, int num){
     total += search(pos, i, num);
   return total;
 }
+
+/* ======================================================================= */
 
 void nextturn(){
   turn ^= 1;
@@ -159,12 +179,16 @@ void nextturn(){
     endflag = true;
 }
 
+/* ======================================================================= */
+
 POS decode(char* str){
   POS pos;
   pos.x = atoi(str)-1;
   pos.y = *(str+1) - 'a';
   return pos;
 }
+
+/* ======================================================================= */
 
 void event(POS pos){
   if(endflag){
@@ -192,6 +216,8 @@ void event(POS pos){
   nextturn();
   drawboard();
 }
+
+/* ======================================================================= */
 
 int main(void){
   if(!initboard())
