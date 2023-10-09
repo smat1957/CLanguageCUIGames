@@ -123,7 +123,7 @@ int search(POS pos, int v, int num){
       return 0;
     if(getstone(pos)==num)
       break;
-    piece ++;
+    piece++;
   }
   return piece;
 }
